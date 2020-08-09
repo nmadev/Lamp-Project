@@ -13,7 +13,7 @@ double valr;
 double valg;
 double valb;
 
-int timeCounter = 0;
+int timeCounter = 50;
 double timeChoice;
 
 int buttonState = LOW;
@@ -79,8 +79,8 @@ void lightDials() {
 
 void autoScroll() {
   while (!change) {
-    delay(50);
-    timeChoice = 10 + 0.25 * analogRead(greendial);
+    delay(timeChoice);
+    timeChoice = 1 + 0.3 * analogRead(greendial);
     timeCounter++;
     if (timeCounter < 255){
       analogWrite(redpin, 255 - timeCounter);
