@@ -16,9 +16,9 @@ double valb;
 int timeCounter = 0;
 double timeChoice;
 
-int buttonState = 0;
-int buttonCounter = 0;
-int lastButtonState = 0;
+int buttonState = LOW;
+
+boolean change = false;
 
 void setup() {
   // put your setup code here, to run once:
@@ -27,75 +27,89 @@ void setup() {
   pinMode(bluepin, OUTPUT);
   pinMode(greenpin, OUTPUT);
   pinMode(buttonpin, INPUT);
+  off();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  off();
 }
 
 void off() {
-  Serial.println("o");
-  analogWrite(redpin, 0); 
-  analogWrite(greenpin, 0); 
-  analogWrite(bluepin, 0);     
-  buttonState = digitalRead(buttonpin);
-  if (buttonState != lastButtonState){
+  while (!change) {
+    delay(50);
+    analogWrite(redpin, 0); 
+    analogWrite(greenpin, 0); 
+    analogWrite(bluepin, 0);     
+    buttonState = digitalRead(buttonpin);
     if (buttonState == HIGH) {
-      lastButtonState = buttonState;
-      lightDials();
+      change = true;
+      while (buttonState == HIGH) {
+        delay(10);
+        buttonState = digitalRead(buttonpin);
+      }
     }
   }
-  delay(50);
+  buttonState = LOW;
+  change = false;
+  lightDials();
 }
 
 void lightDials() {
-  Serial.println("LD");
-  valr = analogRead(reddial);
-  valg = analogRead(greendial);
-  valb = analogRead(bluedial);
-  analogWrite(redpin, valr / 1024 * 254); 
-  analogWrite(greenpin, valg / 1024 * 254); 
-  analogWrite(bluepin, valb / 1024 * 254); 
-  Serial.println(valr);
-  Serial.println(valg);
-  Serial.println(valb);
-  if (buttonState != lastButtonState){
+  while (!change) {
+    delay(10);
+    valr = analogRead(reddial);
+    valg = analogRead(greendial);
+    valb = analogRead(bluedial);
+    analogWrite(redpin, valr / 1024 * 254); 
+    analogWrite(greenpin, valg / 1024 * 254); 
+    analogWrite(bluepin, valb / 1024 * 254);
+    buttonState = digitalRead(buttonpin);
     if (buttonState == HIGH) {
-      lastButtonState = buttonState;
-      autoScroll();
+      change = true;
+      while (buttonState == HIGH) {
+        delay(10);
+        buttonState = digitalRead(buttonpin);
+      }
     }
   }
-  delay(10);
+  buttonState = LOW;
+  change = false;
+  autoScroll();
 }
 
 void autoScroll() {
-  Serial.println("AS");
-  timeChoice = 10 + 0.25 * analogRead(greendial);
-  timeCounter++;
-  if (timeCounter < 255){
-    analogWrite(redpin, 255 - timeCounter);
-    analogWrite(greenpin, timeCounter);
-    analogWrite(bluepin, 0);
-  }
-  else if (timeCounter < 510){
-    analogWrite(redpin, 0);
-    analogWrite(greenpin, 510 - timeCounter);
-    analogWrite(bluepin, timeCounter - 255);
-  }
-  else if (timeCounter < 765){
-    analogWrite(redpin, timeCounter - 510);
-    analogWrite(greenpin, 0);
-    analogWrite(bluepin, 765 - timeCounter);
-  }
-  else if (timeCounter == 765){
-    timeCounter = 0;
-  }
-  if (buttonState != lastButtonState){
+  while (!change) {
+    delay(50);
+    timeChoice = 10 + 0.25 * analogRead(greendial);
+    timeCounter++;
+    if (timeCounter < 255){
+      analogWrite(redpin, 255 - timeCounter);
+      analogWrite(greenpin, timeCounter);
+      analogWrite(bluepin, 0);
+    }
+    else if (timeCounter < 510){
+      analogWrite(redpin, 0);
+      analogWrite(greenpin, 510 - timeCounter);
+      analogWrite(bluepin, timeCounter - 255);
+    }
+    else if (timeCounter < 765){
+      analogWrite(redpin, timeCounter - 510);
+      analogWrite(greenpin, 0);
+      analogWrite(bluepin, 765 - timeCounter);
+    }
+    else if (timeCounter == 765){
+      timeCounter = 0;
+    }
+    buttonState = digitalRead(buttonpin);
     if (buttonState == HIGH) {
-      lastButtonState = buttonState;
-      off();
+      change = true;
+      while (buttonState == HIGH) {
+        delay(10);
+        buttonState = digitalRead(buttonpin);
+      }
     }
   }
-  delay(50);
+  buttonState = LOW;
+  change = false;
+  off();
 }
